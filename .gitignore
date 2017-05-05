@@ -27,3 +27,13 @@
 *.exe
 *.out
 *.app
+
+# misc
+build
+build.bat
+*.ilk
+*.pdb
+.wakatime-project
+
+# VSCode
+.vscode
