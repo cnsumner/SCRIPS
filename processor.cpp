@@ -89,10 +89,13 @@ void Processor::execute()
     else if (opcode == 0x0A) //JUMP const
     {
         PC = param;
+        cycleCount++;
+        return;
     }
     else if (opcode == 0x0B) //BZERO reg, addr
     {
         PC = (registers[reg] == 0 ? param : PC + 1); //PC + 4
+        cycleCount++;
         return;
     }
     else if (opcode == 0x0C) //SEQ	reg, addr
@@ -134,12 +137,14 @@ void Processor::execute()
         stackPtr--;
         stack[stackPtr] = PC + 1; //PC + 4
         PC = param;
+        cycleCount++;
         return;
     }
     else if (opcode == 0x15) //RET
     {
         PC = stack[stackPtr];
         stackPtr++; //stackPtr + 4
+        cycleCount++;
         return;
     }
     else if (opcode == 0x17)

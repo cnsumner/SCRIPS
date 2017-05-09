@@ -61,12 +61,18 @@ int Parser::parse(Program &program)
 		{
 			int opcode = encode(tokens[0]);
 			
-			if (opcode == 0x0A || opcode == 0x0B || opcode == 0x14) //jump, bzero, call
+			if (opcode == 0x0B) //bzero
 			{
-				Instruction instruction = {tokens[0], opcode, program._labels[tokens[1]]};
+				Instruction instruction = {tokens[0], opcode, strtol(tokens[1].c_str(), NULL, 10), program._labels[tokens[2]]};
+				program._instructions.push_back(instruction);
+                labelRefs[program._instructions.size() - 1] = tokens[2];
+			}
+            else if (opcode == 0x0A || opcode == 0x14) //jump, call
+            {
+                Instruction instruction = {tokens[0], opcode, 0, program._labels[tokens[1]]};
 				program._instructions.push_back(instruction);
                 labelRefs[program._instructions.size() - 1] = tokens[1];
-			}
+            }
 			else if (opcode == 0x16) //array
 			{
 				program._labels[tokens[1]] = program._endOfMemory;
@@ -86,28 +92,33 @@ int Parser::parse(Program &program)
                 if (instruction.mnemonic == "entry:")
                     program._entryPoint = program._labels[tokens[0]];
 			}
-            else if (opcode == 0x08 || opcode == 0x12 || opcode == 0x13 || opcode == 0x15) //not, push, pop, ret
+            else if (opcode == 0x08 || opcode == 0x12 || opcode == 0x13) //not, push, pop
             {
-                Instruction instruction = {tokens[0], opcode, 0};
+                Instruction instruction = {tokens[0], opcode, strtol(tokens[1].c_str(), NULL, 10), 0};
+				program._instructions.push_back(instruction);
+            }
+            else if (opcode == 0x15) //ret
+            {
+                Instruction instruction = {tokens[0], opcode, 0, 0};
 				program._instructions.push_back(instruction);
             }
 			else if (   opcode == 0x00 || opcode == 0x01 || opcode == 0x02 || opcode == 0x03 || opcode == 0x05 ||
                         opcode == 0x0C || opcode == 0x0D || opcode == 0x0E || opcode == 0x0F || opcode == 0x10 || opcode == 0x11) //load, loadi, store, storei, addi, SEQ, SNE, SGT, SLT, SGE, SLE
 			{
-                if (std::regex_match(tokens[1], std::regex("[(-|+)]?[0-9]+")))
+                if (std::regex_match(tokens[2], std::regex("[(-|+)]?[0-9]+")))
                 {
-                    Instruction instruction = {tokens[0], opcode, strtol(tokens[1].c_str(), NULL, 10)};
+                    Instruction instruction = {tokens[0], opcode, strtol(tokens[1].c_str(), NULL, 10), strtol(tokens[2].c_str(), NULL, 10)};
 				    program._instructions.push_back(instruction);
                 }
                 else
                 {
-                    Instruction instruction = {tokens[0], opcode, program._labels[tokens[1]]};
+                    Instruction instruction = {tokens[0], opcode, strtol(tokens[1].c_str(), NULL, 10), program._labels[tokens[2]]};
 				    program._instructions.push_back(instruction);
                 }
 			}
             else
             {
-                Instruction instruction = {tokens[0], opcode, strtol(tokens[1].c_str(), NULL, 10)};
+                Instruction instruction = {tokens[0], opcode, strtol(tokens[1].c_str(), NULL, 10), strtol(tokens[2].c_str(), NULL, 10)};
 				program._instructions.push_back(instruction);
             }		
 		}
@@ -158,6 +169,8 @@ int Parser::encode(string mnemonic)
         opcode = 0x08;
     else if (mnemonic == "XOR")
         opcode = 0x09;
+    else if (mnemonic == "MOVE")
+        opcode = 0x18;
     else if (mnemonic == "JUMP")
         opcode = 0x0A;
     else if (mnemonic == "BZERO")
