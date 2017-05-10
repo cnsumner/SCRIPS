@@ -15,6 +15,7 @@ private:
   unsigned int PC;       //program counter
   unsigned int stackPtr; //stack pointer register
   unsigned int cycleCount;
+  unsigned int memAccessCount;
   vector<int> stack;
   vector<int> registers;
   Program _program;

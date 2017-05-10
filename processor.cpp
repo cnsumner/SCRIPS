@@ -22,6 +22,7 @@ Processor::Processor(Program &program)
     stack = vector<int>(1028, 0);
     registers = vector<int>(8, 0);
     cycleCount = 0;
+    memAccessCount = 0;
     _program = program;
 }
 
@@ -43,24 +44,29 @@ void Processor::execute()
     if (opcode == 0x00) //LOAD reg, addr
     {
         registers[reg] = _program._dataMemory[param];
+        memAccessCount++;
     }
     else if (opcode == 0x01) //LOADI reg, addr
     {
         int addr = _program._dataMemory[param];
         registers[reg] = _program._dataMemory[addr];
+        memAccessCount += 2;
     }
     else if (opcode == 0x02) //STORE reg, addr
     {
         _program._dataMemory[param] = registers[reg];
+        memAccessCount++;
     }
     else if (opcode == 0x03) //STOREI reg, addr
     {
         int addr = _program._dataMemory[param];
         _program._dataMemory[addr] = registers[reg];
+        memAccessCount += 2;
     }
     else if (opcode == 0x04) //ADD reg, addr
     {
         registers[reg] = registers[reg] + _program._dataMemory[param];
+        memAccessCount++;
     }
     else if (opcode == 0x05) //ADDI reg, const
     {
@@ -69,10 +75,12 @@ void Processor::execute()
     else if (opcode == 0x06) //AND reg, addr
     {
         registers[reg] = registers[reg] & _program._dataMemory[param];
+        memAccessCount++;
     }
     else if (opcode == 0x07) //OR reg, addr
     {
         registers[reg] = registers[reg] | _program._dataMemory[param];
+        memAccessCount++;
     }
     else if (opcode == 0x08) //NOT reg
     {
@@ -81,6 +89,7 @@ void Processor::execute()
     else if (opcode == 0x09) //XOR reg, addr
     {
         registers[reg] = registers[reg] ^ _program._dataMemory[param];
+        memAccessCount++;
     }
     else if (opcode == 0x18) //move reg2, reg2
     {
@@ -101,26 +110,32 @@ void Processor::execute()
     else if (opcode == 0x0C) //SEQ	reg, addr
     {
         registers[reg] = (registers[reg] == _program._dataMemory[param] ? 1 : 0);
+        memAccessCount++;
     }
     else if (opcode == 0x0D) //SNE	addr
     {
         registers[reg] = (registers[reg] != _program._dataMemory[param] ? 1 : 0);
+        memAccessCount++;
     }
     else if (opcode == 0x0E) //SGT	addr
     {
         registers[reg] = (registers[reg] > _program._dataMemory[param] ? 1 : 0);
+        memAccessCount++;
     }
     else if (opcode == 0x0F) //SLT	addr
     {
         registers[reg] = (registers[reg] < _program._dataMemory[param] ? 1 : 0);
+        memAccessCount++;
     }
     else if (opcode == 0x10) //SGE	addr
     {
         registers[reg] = (registers[reg] >= _program._dataMemory[param] ? 1 : 0);
+        memAccessCount++;
     }
     else if (opcode == 0x11) //SLE	addr
     {
         registers[reg] = (registers[reg] <= _program._dataMemory[param] ? 1 : 0);
+        memAccessCount++;
     }
     else if (opcode == 0x12) //PUSH reg
     {
@@ -179,6 +194,8 @@ void Processor::info()
     }
     cout << "|-------------------------|" << endl;
     cout << "| Cycles: " << left << setw(15) << setfill(' ') << dec << cycleCount << " |" << endl;
+    cout << "|-------------------------|" << endl;
+    cout << "| Mem Access: " << left << setw(11) << setfill(' ') << dec << memAccessCount << " |" << endl;
     cout << "|-------------------------|" << endl;
 }
 
